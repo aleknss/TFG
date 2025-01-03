@@ -1,0 +1,35 @@
+import React from 'react'
+import { HiHome, HiUser, HiOutlineRss } from "react-icons/hi";
+import HeaderItem from './HeaderItem';
+
+function Header() {
+    const menu = [
+        {
+            id: 1,
+            name: "HOME",
+            icon: HiHome,
+        },
+        {
+            id: 2,
+            name: "CUENTA",
+            icon: HiUser,
+        },
+        {
+            id: 3,
+            name: "CONTROL",
+            icon: HiOutlineRss,
+        },
+    ]
+
+  return (
+    <div className='sticky top-0 z-50 bg-white'>
+        <nav className='flex items-center w-full h-24 pl-10'>
+            {menu.map((item) => (
+                <HeaderItem name={item.name} Icon={item.icon} key={item.id}/>
+            ))}
+        </nav>
+    </div>
+  )
+}
+
+export default Header

@@ -1,0 +1,33 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* MAIN STYLES */
+
+h2 {
+    font-family: 'Montserrat';
+    font-weight: 600;
+    font-size: 32px;
+    letter-spacing: 0.04em;
+    color: #000000;
+}
+
+h1 {
+    font-family: 'Montserrat';
+    font-weight: 700;
+    font-size: 48px;
+    color: #000000;
+}
+
+p {
+    font-family: 'Roboto';
+    font-weight: 400;
+    font-size: 24px;
+    color: #000000;
+}
+
+/* */
+
+ul {
+    list-style-type:disc;
+  }
