@@ -23,10 +23,17 @@ function Header() {
 
   return (
     <div className='sticky top-0 z-50 bg-white'>
-        <nav className='flex items-center w-full h-24 pl-10'>
-            {menu.map((item) => (
-                <HeaderItem name={item.name} Icon={item.icon} key={item.id}/>
-            ))}
+        <nav className='flex items-center w-full h-24 ml-20 gap-20'>
+            <div className='hidden md:flex gap-20'>
+                {menu.map((item) => (
+                    <HeaderItem name={item.name} Icon={item.icon} key={item.id}/>
+                ))}
+            </div>
+            <div className='flex md:hidden gap-20'>
+                {menu.map((item) => (
+                    <HeaderItem name={item.name} Icon={item.icon} key={item.id}/>
+                ))}
+            </div>
         </nav>
     </div>
   )
