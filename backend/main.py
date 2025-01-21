@@ -1,9 +1,13 @@
-from fastapi import FastAPI;
+from fastapi import FastAPI
+from core.database import get_engine
+from api.routes import usuarios, inventarios, articulos
 
-app = FastAPI()
+app = FastAPI(title="Gestión de Inventarios")
 
-app.title = "Backend TFG"
+# Inicializar ODMantic
+engine = get_engine()
 
-@app.get('/', tags = ['Home'])
-def home():
-    return "Home"
+# Incluir rutas
+app.include_router(usuarios.router, prefix="/usuarios", tags=["Usuarios"])
+app.include_router(inventarios.router, prefix="/inventarios", tags=["Inventarios"])
+app.include_router(articulos.router, prefix="/articulos", tags=["Artículos"])

@@ -1,7 +1,22 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import caja from "../assets/images/caja.png";
 
 function Home() {
+  const [data, setData] = useState([]);
+
+  useEffect(() => {
+    // Llama al backend
+    axios
+      .get("http://127.0.0.1:8000/api/data")
+      .then((response) => {
+        setData(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error al obtener datos:", error);
+      });
+  }, []);
+
   return (
     <div>
       <div className="apartado1 flex h-[600px] items-center mx-14">
@@ -49,6 +64,12 @@ function Home() {
           </ul>
         </div>
       </div>
+
+      <ul>
+        {data.map((item, index) => (
+          <li key={index}>{item}</li>
+        ))}
+      </ul>
     </div>
   );
 }
