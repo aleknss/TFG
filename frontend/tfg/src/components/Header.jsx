@@ -8,16 +8,19 @@ function Header() {
       id: 1,
       name: "HOME",
       icon: HiHome,
+      to: "/",
     },
     {
       id: 2,
       name: "CUENTA",
       icon: HiUser,
+      to: "/login",
     },
     {
       id: 3,
       name: "CONTROL",
       icon: HiOutlineRss,
+      to: "/inventarios",
     },
   ];
 
@@ -26,7 +29,12 @@ function Header() {
       <nav className="flex items-center w-full h-24 ml-20 gap-20">
         <div className="flex gap-20">
           {menu.map((item) => (
-            <HeaderItem name={item.name} Icon={item.icon} key={item.id} />
+            <HeaderItem
+              name={item.name}
+              Icon={item.icon}
+              key={item.id}
+              to={item.to}
+            />
           ))}
         </div>
       </nav>

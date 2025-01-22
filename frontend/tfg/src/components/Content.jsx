@@ -1,12 +1,7 @@
-import React from 'react'
-import Home from './Home'
+import React from "react";
 
-function Content() {
-  return (
-    <div>
-        <Home />
-    </div>
-  )
-}
+const Content = ({ children }) => {
+  return <main>{children}</main>;
+};
 
-export default Content
+export default Content;
