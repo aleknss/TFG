@@ -4,11 +4,11 @@ from datetime import datetime
 
 
 class UserResponse(BaseModel):
-    id: UUID
+    id: int
     email: EmailStr
-    first_name: str
-    last_name: str
-
+    username: str
+    url_imagen: str
+    descripcion: str
 
 class PasswordChange(BaseModel):
     current_password: str

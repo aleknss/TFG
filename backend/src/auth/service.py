@@ -10,12 +10,12 @@ from src.entities.user import User
 from . import models
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from ..exceptions import AuthenticationError
+import os
 import logging
 
-# You would want to store this in an environment variable or a secret manager
-SECRET_KEY = '197b2c37c391bed93fe80344fe73b806947a65e36206e05a1a23c2fa12702fe3'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
@@ -37,7 +37,7 @@ def authenticate_user(email: str, password: str, db: Session) -> User | bool:
     return user
 
 
-def create_access_token(email: str, user_id: UUID, expires_delta: timedelta) -> str:
+def create_access_token(email: str, user_id: int, expires_delta: timedelta) -> str:
     encode = {
         'sub': email,
         'id': str(user_id),
@@ -59,10 +59,8 @@ def verify_token(token: str) -> models.TokenData:
 def register_user(db: Session, register_user_request: models.RegisterUserRequest) -> None:
     try:
         create_user_model = User(
-            id=uuid4(),
             email=register_user_request.email,
-            first_name=register_user_request.first_name,
-            last_name=register_user_request.last_name,
+            username=register_user_request.username,
             password_hash=get_password_hash(register_user_request.password)
         )    
         db.add(create_user_model)

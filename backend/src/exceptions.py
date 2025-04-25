@@ -1,21 +1,36 @@
 from fastapi import HTTPException
 
-class TodoError(HTTPException):
-    """Base exception for todo-related errors"""
+class InventoryError(HTTPException):
+    """Base exception for inventory-related errors"""
     pass
 
-class TodoNotFoundError(TodoError):
-    def __init__(self, todo_id=None):
-        message = "Todo not found" if todo_id is None else f"Todo with id {todo_id} not found"
+class InventoryNotFoundError(InventoryError):
+    def __init__(self, inventory_id=None):
+        message = "inventory not found" if inventory_id is None else f"Inventory with id {inventory_id} not found"
         super().__init__(status_code=404, detail=message)
 
-class TodoCreationError(TodoError):
+class InventoryCreationError(InventoryError):
     def __init__(self, error: str):
-        super().__init__(status_code=500, detail=f"Failed to create todo: {error}")
+        super().__init__(status_code=500, detail=f"Failed to create inventory: {error}")
 
+
+class ItemError(HTTPException):
+    """Base exception for item-related errors"""
+    pass
+
+class ItemNotFoundError(InventoryError):
+    def __init__(self, item_id=None):
+        message = "item not found" if item_id is None else f"Item with id {item_id} not found"
+        super().__init__(status_code=404, detail=message)
 class UserError(HTTPException):
     """Base exception for user-related errors"""
     pass
+
+class ItemCreationError(InventoryError):
+    def __init__(self, error: str):
+        super().__init__(status_code=500, detail=f"Failed to create item: {error}")
+
+
 
 class UserNotFoundError(UserError):
     def __init__(self, user_id=None):
