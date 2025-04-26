@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from "react";
 import caja from "../assets/images/caja.png";
 
 function Home() {
-  const [data, setData] = useState([]);
 
   return (
     <div>

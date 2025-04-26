@@ -31,6 +31,15 @@ class ItemCreationError(InventoryError):
         super().__init__(status_code=500, detail=f"Failed to create item: {error}")
 
 
+class HistoryError(HTTPException):
+    """Base exception for inventory-related errors"""
+    pass
+
+class HistoryNotFoundError(HistoryError):
+    def __init__(self, history_id=None):
+        message = "history not found" if history_id is None else f"History with id {history_id} not found"
+        super().__init__(status_code=404, detail=message)
+
 
 class UserNotFoundError(UserError):
     def __init__(self, user_id=None):

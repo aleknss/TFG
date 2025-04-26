@@ -36,6 +36,10 @@ def create_inventory(db: DbSession, inventory: models.InventoryBase):
 def get_inventories(db: DbSession):
     return service.get_inventories(db)
 
+@router.get("/user/{user_id}", response_model=List[models.InventoryResponse])
+def get_inventories_by_user(db: DbSession, user_id: int):
+    return service.get_inventories_by_user(user_id, db)
+
 @router.get("/{inventory_id}", response_model=models.InventoryResponse)
 def get_inventory(db: DbSession, inventory_id: int):
     return service.get_inventory_by_id(db, inventory_id)

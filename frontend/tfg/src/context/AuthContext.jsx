@@ -1,38 +1,74 @@
-// src/context/AuthContext.jsx
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../services/api';
+import { useNavigate } from 'react-router-dom';
 
-export const AuthContext = createContext();
+const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [usuarioId, setUsuarioId] = useState(null);
+  const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('authToken'));
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const id = localStorage.getItem("usuarioId");
-    if (token && id) {
-      setIsAuthenticated(true);
-      setUsuarioId(id);
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.get('/usuario/me').then(response => setUser(response.data)).catch(logout);
+      setUser({ token }); 
     }
-  }, []);
+    setLoading(false);
+  }, [token]); 
 
-  const login = (token, id) => {
-    localStorage.setItem("token", token);
-    localStorage.setItem("usuarioId", id);
-    setIsAuthenticated(true);
-    setUsuarioId(id);
+  const login = async (email, password) => {
+    try {
+       const formData = new URLSearchParams();
+       formData.append('username', email); 
+       formData.append('password', password);
+
+      const response = await api.post('/auth/token', formData, {
+         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+      });
+
+      const { access_token } = response.data;
+      localStorage.setItem('authToken', access_token);
+      setToken(access_token);
+      api.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
+      const userResponse = await api.get('/usuario/me'); 
+      setUser(userResponse.data);
+      setUser({ token: access_token }); 
+      navigate('/dashboard');
+      return true; 
+    } catch (error) {
+      console.error("Error en el login:", error.response?.data || error.message);
+      localStorage.removeItem('authToken');
+      setToken(null);
+      setUser(null);
+      delete api.defaults.headers.common['Authorization'];
+      return false;
+    }
   };
 
+
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("usuarioId");
-    setIsAuthenticated(false);
-    setUsuarioId(null);
+    localStorage.removeItem('authToken');
+    setToken(null);
+    setUser(null);
+    delete api.defaults.headers.common['Authorization'];
+    navigate('/login');
+  };
+
+  const authContextValue = {
+    user,
+    token,
+    login,
+    logout,
+    isAuthenticated: !!token,
+    isLoading: loading,
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, usuarioId, login, logout }}>
-      {children}
+    <AuthContext.Provider value={authContextValue}>
+      {!loading && children} {}
     </AuthContext.Provider>
   );
 };

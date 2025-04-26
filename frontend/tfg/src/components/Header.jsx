@@ -1,6 +1,8 @@
 import React from "react";
 import { HiHome, HiUser, HiOutlineRss } from "react-icons/hi";
 import HeaderItem from "./HeaderItem";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Header() {
   const menu = [
@@ -14,7 +16,7 @@ function Header() {
       id: 2,
       name: "CUENTA",
       icon: HiUser,
-      to: "/login",
+      to: "/cuenta",
     },
     {
       id: 3,
@@ -24,18 +26,43 @@ function Header() {
     },
   ];
 
+  const { isAuthenticated, logout } = useAuth();
+
+
+  const menuItemsToDisplay = isAuthenticated
+  ? menu
+  : menu.filter(item => item.name === "HOME");
+
+
+  const handleLogout = () => {
+    logout();
+  };
+
+
   return (
     <div className="sticky top-0 z-50 bg-white">
       <nav className="flex items-center w-full h-24 ml-20 gap-20">
         <div className="flex gap-20">
-          {menu.map((item) => (
-            <HeaderItem
-              name={item.name}
-              Icon={item.icon}
-              key={item.id}
-              to={item.to}
-            />
-          ))}
+        {menuItemsToDisplay.map((item) => (
+          <HeaderItem
+            name={item.name}
+            Icon={item.icon}
+            key={item.id}
+            to={item.to}
+          />
+        ))}
+        </div>
+        <div>
+          { isAuthenticated ? (
+            <>
+            <button onClick={handleLogout}>Logout</button>
+            </>
+          ) : (
+            <>  
+            <Link to="/login">Login</Link>
+            </>
+          )
+                    }
         </div>
       </nav>
     </div>
