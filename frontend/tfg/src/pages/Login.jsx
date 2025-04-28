@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { login, isAuthenticated } = useAuth();
@@ -13,27 +13,26 @@ function Login() {
 
   React.useEffect(() => {
     if (isAuthenticated) {
-      navigate('/cuenta');
+      navigate("/cuenta");
     }
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError('');
+    setError("");
     setIsSubmitting(true);
 
     try {
       const success = await login(email, password);
 
       if (!success) {
-         setError('Credenciales inválidas. Por favor, intenta de nuevo.');
+        setError("Credenciales inválidas. Por favor, intenta de nuevo.");
       }
-
     } catch (err) {
-       console.error("Error inesperado en handleSubmit:", err);
-       setError('Ocurrió un error inesperado durante el inicio de sesión.');
+      console.error("Error inesperado en handleSubmit:", err);
+      setError("Ocurrió un error inesperado durante el inicio de sesión.");
     } finally {
-       setIsSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
@@ -63,9 +62,9 @@ function Login() {
             autoComplete="current-password"
           />
         </div>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+          {isSubmitting ? "Iniciando sesión..." : "Iniciar Sesión"}
         </button>
       </form>
     </div>

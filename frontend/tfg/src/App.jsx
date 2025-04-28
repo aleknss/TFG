@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Inventarios from "./pages/Inventarios";
 import Articulos from "./pages/Articulos";
+import Cuenta from "./pages/Cuenta";
 import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
 
@@ -21,6 +22,8 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/inventarios" element={<Inventarios />} />
               <Route path="/articulos" element={<Articulos />} />
+              <Route path="/cuenta" element={<Cuenta />} />
+              <Route path="*" element={<Home />} />
             </Routes>
           </div>
         </div>

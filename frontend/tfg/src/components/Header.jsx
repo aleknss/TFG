@@ -26,43 +26,42 @@ function Header() {
     },
   ];
 
-  const { isAuthenticated, logout } = useAuth();
-
+  const { isAuthenticated, user, isLoading } = useAuth();
 
   const menuItemsToDisplay = isAuthenticated
-  ? menu
-  : menu.filter(item => item.name === "HOME");
-
-
-  const handleLogout = () => {
-    logout();
-  };
-
+    ? menu
+    : menu.filter((item) => item.name === "HOME");
 
   return (
-    <div className="sticky top-0 z-50 bg-white">
-      <nav className="flex items-center w-full h-24 ml-20 gap-20">
+    <div className="sticky top-0 z-50 bg-white max-w-full">
+      <nav className="flex w-full h-24 px-20 justify-between box-border items-center">
         <div className="flex gap-20">
-        {menuItemsToDisplay.map((item) => (
-          <HeaderItem
-            name={item.name}
-            Icon={item.icon}
-            key={item.id}
-            to={item.to}
-          />
-        ))}
+          {menuItemsToDisplay.map((item) => (
+            <HeaderItem
+              name={item.name}
+              Icon={item.icon}
+              key={item.id}
+              to={item.to}
+            />
+          ))}
         </div>
         <div>
-          { isAuthenticated ? (
+          {isAuthenticated && user ? (
             <>
-            <button onClick={handleLogout}>Logout</button>
+              <p className="font-montserrat font-semibold text-primary-color select-none">
+                {user.username}
+              </p>
             </>
           ) : (
-            <>  
-            <Link to="/login">Login</Link>
+            <>
+              <Link
+                to="/login"
+                className="bg-primary-color text-xl font-montserrat font-semibold text-white px-6 py-2 rounded-md hover:bg-white hover:text-primary-color hover:border-primary-color border-2 border-primary-color transition duration-300 ease-in-out"
+              >
+                LOGIN
+              </Link>
             </>
-          )
-                    }
+          )}
         </div>
       </nav>
     </div>

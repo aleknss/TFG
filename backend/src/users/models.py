@@ -8,7 +8,13 @@ class UserResponse(BaseModel):
     username: str
     url_imagen: Optional[str] = None
     descripcion: Optional[str] = None
-
+    
+class DescUpdate(BaseModel):
+    descripcion: str
+    
+class ImageUpdate(BaseModel):
+    url_imagen: str
+    
 class PasswordChange(BaseModel):
     current_password: str
     new_password: str

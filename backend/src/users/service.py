@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from . import models
 from src.entities.user import User
 from src.exceptions import UserNotFoundError, InvalidPasswordError, PasswordMismatchError
@@ -18,6 +18,15 @@ def get_user_by_id(db: Session, user_id: int) -> models.UserResponse:
     logging.info(f"Successfully retrieved user with ID: {user_id}")
     return user
 
+def change_desc(db:Session, user_id: int, description_change: models.DescUpdate) -> None:
+    try:
+        user = get_user_by_id(db, user_id)
+        user.description = description_change.description
+        db.commit()
+        logging.info(f"Successfully changed description for user ID: {user_id}")
+    except Exception as e:
+        logging.error(f"Error during description change for user ID: {user_id}. Error: {str(e)}")
+        raise
 
 def change_password(db: Session, user_id: int, password_change: models.PasswordChange) -> None:
     try:

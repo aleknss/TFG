@@ -4,7 +4,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary-color": "#4725E1",
+        "primary-color": "#1C4E80",
+        "secondary-color": "#2e7fd0",
+      },
+      fontFamily: {
+        montserrat: ["Montserrat", "sans-serif"],
+        roboto: ["Roboto", "sans-serif"],
       },
     },
   },
