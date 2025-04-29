@@ -21,7 +21,7 @@ def get_user_by_id(db: Session, user_id: int) -> models.UserResponse:
 def change_desc(db:Session, user_id: int, description_change: models.DescUpdate) -> None:
     try:
         user = get_user_by_id(db, user_id)
-        user.description = description_change.description
+        user.descripcion = description_change.descripcion
         db.commit()
         logging.info(f"Successfully changed description for user ID: {user_id}")
     except Exception as e:

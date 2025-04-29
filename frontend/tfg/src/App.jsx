@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Inventarios from "./pages/Inventarios";
 import Articulos from "./pages/Articulos";
 import Cuenta from "./pages/Cuenta";
+import ProtectedRoute from "./context/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
 
@@ -20,10 +21,12 @@ const App = () => {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
-              <Route path="/inventarios" element={<Inventarios />} />
-              <Route path="/articulos" element={<Articulos />} />
-              <Route path="/cuenta" element={<Cuenta />} />
-              <Route path="*" element={<Home />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/inventarios" element={<Inventarios />} />
+                <Route path="/articulos" element={<Articulos />} />
+                <Route path="/cuenta" element={<Cuenta />} />
+                <Route path="*" element={<Home />} />
+              </Route>
             </Routes>
           </div>
         </div>

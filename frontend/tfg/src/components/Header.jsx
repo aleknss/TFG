@@ -33,7 +33,7 @@ function Header() {
     : menu.filter((item) => item.name === "HOME");
 
   return (
-    <div className="sticky top-0 z-50 bg-white max-w-full">
+    <div className="sticky top-0 z-50 bg-white max-w-full shadow-md">
       <nav className="flex w-full h-24 px-20 justify-between box-border items-center">
         <div className="flex gap-20">
           {menuItemsToDisplay.map((item) => (
@@ -56,7 +56,7 @@ function Header() {
             <>
               <Link
                 to="/login"
-                className="bg-primary-color text-xl font-montserrat font-semibold text-white px-6 py-2 rounded-md hover:bg-white hover:text-primary-color hover:border-primary-color border-2 border-primary-color transition duration-300 ease-in-out"
+                className="bg-primary-color text-xl font-montserrat font-semibold text-white px-6 py-2 rounded-md hover:bg-secondary-color"
               >
                 LOGIN
               </Link>

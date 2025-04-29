@@ -2,10 +2,9 @@ import React from "react";
 import caja from "../assets/images/caja.png";
 
 function Home() {
-
   return (
     <div>
-      <div className="apartado1 flex h-[600px] items-center mx-14">
+      <div className="apartado1 flex h-[600px] items-center mx-48">
         <div className="w-3/5 justify-center flex-col flex gap-4">
           <h1>
             Control Total de tu <br /> Inventario en Tiempo Real
