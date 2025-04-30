@@ -56,7 +56,7 @@ function Header() {
             <>
               <Link
                 to="/login"
-                className="bg-primary-color text-xl font-montserrat font-semibold text-white px-6 py-2 rounded-md hover:bg-secondary-color"
+                className="bg-primary-color text-xl font-montserrat font-semibold text-white px-6 py-2 rounded-md hover:bg-secondary-color transition-colors duration-300 ease-in-out"
               >
                 LOGIN
               </Link>

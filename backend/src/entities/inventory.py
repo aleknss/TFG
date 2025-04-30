@@ -8,7 +8,6 @@ class Inventory(Base):
     nombre = Column(String(255), unique=True, nullable=False)
     creado_en = Column(Date, unique=False, nullable=False)
     usuario_id = Column(Integer, unique=False, nullable=False)
-    url_imagen = Column(String(255), nullable=True)
 
 
     def __repr__(self):

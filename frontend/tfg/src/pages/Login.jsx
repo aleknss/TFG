@@ -81,7 +81,7 @@ function Login() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="bg-primary-color py-2 px-8 text-white rounded-md text-2xl w-32 flex justify-center font-montserrat font-semibold hover:bg-secondary-color"
+              className="bg-primary-color py-2 px-8 text-white rounded-md text-2xl w-fit flex justify-center font-montserrat font-semibold hover:bg-secondary-color transition-colors duration-300 ease-in-out"
             >
               {isSubmitting ? "Iniciando sesión..." : "ENTRAR"}
             </button>

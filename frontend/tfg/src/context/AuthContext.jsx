@@ -11,18 +11,28 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (token) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-      api
-        .get("/usuario/me")
-        .then((response) => setUser(response.data))
-        .catch(logout);
-      setUser({ token });
-    }
-    setLoading(false);
+    const fetchUser = async () => {
+      if (token) {
+        api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+        try {
+          const response = await api.get("/usuario/me");
+          setUser(response.data);
+        } catch (error) {
+          console.error("Failed to fetch user:", error);
+          logout();
+        } finally {
+           setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, [token]);
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const formData = new URLSearchParams();
       formData.append("username", email);
@@ -34,13 +44,15 @@ export const AuthProvider = ({ children }) => {
 
       const { access_token } = response.data;
       localStorage.setItem("authToken", access_token);
-      setToken(access_token);
       api.defaults.headers.common["Authorization"] = `Bearer ${access_token}`;
+
       const userResponse = await api.get("/usuario/me");
       setUser(userResponse.data);
-      setUser({ token: access_token });
-      navigate("/cuenta");
+      setToken(access_token);
+
+      setLoading(false);
       return true;
+
     } catch (error) {
       console.error(
         "Error en el login:",
@@ -50,6 +62,7 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
       setUser(null);
       delete api.defaults.headers.common["Authorization"];
+      setLoading(false);
       return false;
     }
   };
@@ -64,6 +77,7 @@ export const AuthProvider = ({ children }) => {
 
   const authContextValue = {
     user,
+    setUser,
     token,
     login,
     logout,

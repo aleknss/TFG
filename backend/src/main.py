@@ -1,12 +1,17 @@
 from fastapi import FastAPI
 from .database.core import engine, Base
 from .api import register_routes
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
 from .logging import configure_logging, LogLevels
 import os
 from fastapi.middleware.cors import CORSMiddleware
 
 
 configure_logging(LogLevels.info)
+
+BASE_DIR = Path(__file__).resolve().parent
+UPLOADS_DIR = BASE_DIR / "uploads"
 
 app = FastAPI()
 
@@ -23,5 +28,6 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
+app.mount("/static", StaticFiles(directory=str(BASE_DIR / "uploads")), name="static")
 
 register_routes(app)

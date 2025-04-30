@@ -6,11 +6,9 @@ class InventoryBase(BaseModel):
     nombre: str
     creado_en: datetime
     usuario_id: int
-    url_imagen: Optional[str]
     
 class InventoryUpdate(BaseModel):
     nombre: Optional[str]
-    url_imagen: Optional[str]
 
 class InventoryResponse(InventoryBase):
     id: int

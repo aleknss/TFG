@@ -8,7 +8,6 @@ class User(Base):
     email = Column(String(255), unique=True, nullable=False)
     username = Column(String(255), nullable=False)
     password_hash = Column(String(255), nullable=False)
-    url_imagen = Column(String(255), nullable=True)
     descripcion = Column(Text, nullable=True)
 
     def __repr__(self):
