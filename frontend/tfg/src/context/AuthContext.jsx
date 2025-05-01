@@ -21,7 +21,7 @@ export const AuthProvider = ({ children }) => {
           console.error("Failed to fetch user:", error);
           logout();
         } finally {
-           setLoading(false);
+          setLoading(false);
         }
       } else {
         setLoading(false);
@@ -52,7 +52,6 @@ export const AuthProvider = ({ children }) => {
 
       setLoading(false);
       return true;
-
     } catch (error) {
       console.error(
         "Error en el login:",

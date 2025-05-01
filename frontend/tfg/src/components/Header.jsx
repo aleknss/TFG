@@ -3,6 +3,7 @@ import { HiHome, HiUser, HiOutlineRss } from "react-icons/hi";
 import HeaderItem from "./HeaderItem";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import Avatar from "./Avatar";
 
 function Header() {
   const menu = [

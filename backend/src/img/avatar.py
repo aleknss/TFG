@@ -1,4 +1,4 @@
-# src/images/controller.py
+# src/img/avatar.py
 
 import os
 import shutil

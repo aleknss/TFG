@@ -1,9 +1,12 @@
 import React from "react";
+import InventarioItem from "../components/InventarioItem";
 
 const Inventarios = () => {
   return (
     <div>
-      <h1>Inventarios</h1>
+      <div className="fixed bg-primary-color w-1/12 h-5/6 m-4 rounded-lg">
+        <InventarioItem />
+      </div>
     </div>
   );
 };

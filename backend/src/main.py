@@ -12,6 +12,7 @@ configure_logging(LogLevels.info)
 
 BASE_DIR = Path(__file__).resolve().parent
 UPLOADS_DIR = BASE_DIR / "uploads"
+UPLOAD_PFP = UPLOADS_DIR / "pfp"
 
 app = FastAPI()
 
@@ -28,6 +29,10 @@ app.add_middleware(
     allow_headers=["*"],  
 )
 
-app.mount("/static", StaticFiles(directory=str(BASE_DIR / "uploads")), name="static")
+app.mount(
+    "/static",
+    StaticFiles(directory=str(UPLOADS_DIR)),
+    name="static",
+)
 
 register_routes(app)
