@@ -14,7 +14,6 @@ const Cuenta = () => {
   const [descError, setDescError] = useState("");
 
   const [selectedFile, setSelectedFile] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
   const [imageLoading, setImageLoading] = useState(false);
   const [imageError, setImageError] = useState("");
   const fileInputRef = useRef(null);
@@ -22,8 +21,7 @@ const Cuenta = () => {
   useEffect(() => {
     if (user) {
       setDescripcion(user.descripcion || "");
-      setPreviewUrl(null);
-      setSelectedFile(null);
+        setSelectedFile(null);
 
       const newBackendUrl = getAvatarUrl(user.id);
     } else {
@@ -73,29 +71,31 @@ const Cuenta = () => {
   };
 
   const handleFileChange = (event) => {
-    // ver si el archivo tiene un formato imagen
     const file = event.target.files[0];
     if (file && file.type.startsWith("image/")) {
       setSelectedFile(file);
       setImageError("");
-      // crear un url temporal para la imagen y su previsualización (sacado del vídeo de youtube d previews)
-      const reader = new FileReader();
-      reader.onloadend = () => setPreviewUrl(reader.result);
-      reader.readAsDataURL(file);
+  
     } else {
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      if (file) setImageError("Archivo no válido. Selecciona una imagen.");
-      if (fileInputRef.current) fileInputRef.current.value = "";
+      setSelectedFile(null); 
+      if (file) {
+          setImageError("Archivo no válido. Selecciona una imagen.");
+      } else {
+           setImageError("");
+      }
+      if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+      }
     }
   };
 
   const handleCancelUpload = () => {
     setSelectedFile(null);
-    setPreviewUrl(null);
     setImageError("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
+    if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+    }
+};
 
   // aquí se manda la imagen al backend
   const handleImageUpload = async () => {
@@ -114,7 +114,6 @@ const Cuenta = () => {
       });
 
       setSelectedFile(null);
-      setPreviewUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
 
     } catch (err) {
@@ -136,45 +135,46 @@ const Cuenta = () => {
         id="cuenta"
       >
         <div className="relative w-full sm:w-4/12 h-64 sm:h-full group flex-shrink-0">
-          <Avatar userId={user?.id} />
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            style={{ display: "none" }}
-          />
-          <div
-            className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center rounded-md transition-opacity duration-300 cursor-pointer"
-            onClick={handleImageClick}
-            title="Cambiar foto de perfil"
-          >
-            <HiCamera className="text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          </div>
-          {previewUrl && (
-            <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 p-1 bg-black bg-opacity-30 rounded">
-              <button
+    <Avatar userId={user?.id} />
+    <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        style={{ display: "none" }}
+    />
+    <div
+        className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 flex items-center justify-center rounded-md transition-opacity duration-300 cursor-pointer"
+        onClick={handleImageClick}
+        title="Cambiar foto de perfil"
+    >
+        <HiCamera className="text-white text-4xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    </div>
+
+    {selectedFile && (
+        <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 p-1 bg-black bg-opacity-30 rounded">
+            <button
                 className="bg-primary-color text-white px-3 py-1 rounded hover:bg-secondary-color disabled:opacity-50 text-sm flex items-center gap-1"
                 onClick={handleImageUpload}
                 disabled={imageLoading}
-              >
+            >
                 <HiCheck /> {imageLoading ? "Subiendo..." : "Guardar"}
-              </button>
-              <button
+            </button>
+            <button
                 className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-sm flex items-center gap-1"
-                onClick={handleCancelUpload}
+                onClick={handleCancelUpload} 
                 disabled={imageLoading}
-              >
+            >
                 <HiX /> Cancelar
-              </button>
-            </div>
-          )}
-          {imageError && (
-            <p className="text-red-100 text-xs mt-1 absolute bottom-[-25px] w-full text-center bg-red-700 bg-opacity-80 p-1 rounded">
-              {imageError}
-            </p>
-          )}
+            </button>
         </div>
+    )}
+    {imageError && (
+         <div className="absolute top-2 left-2 right-2 text-center text-red-500 bg-white bg-opacity-80 p-1 rounded text-sm">
+             {imageError}
+         </div>
+    )}
+</div>
 
         <div className="flex flex-col justify-between gap-6 w-full sm:w-8/12">
           <div className="flex flex-col gap-4">

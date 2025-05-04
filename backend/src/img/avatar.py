@@ -40,14 +40,9 @@ def get_file_extension(filename: str, content_type: Optional[str] = None) -> Opt
 @router.post("/change-avatar")
 async def change_avatar(
     current_user: CurrentUser,
-    user_id: int = Query(..., description="The ID of the user updating the avatar"),
     avatar: UploadFile = File(..., description="The avatar image file to upload")
 ):
-    if (current_user.user_id != user_id):
-        raise HTTPException(
-            status_code=401,
-            detail="No tienes permisos para cambiar el avatar de otro usuario."
-        )
+    user_id = current_user.user_id
     
     contents = await avatar.read()
     await avatar.close()

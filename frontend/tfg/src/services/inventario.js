@@ -11,3 +11,7 @@ export const fetchInventarioById = (id) => {
 export const createInventario = (data) => {
   return api.post("/inventories", data);
 };
+
+export const deleteInventario = (id) => {
+  return api.delete(`/inventories/${id}`);
+};

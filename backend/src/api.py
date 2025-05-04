@@ -5,6 +5,7 @@ from src.items.controller import router as items_router
 from src.inventories.controller import router as inventories_router
 from src.img.avatar import router as avatar_router
 from src.history.controller import router as history_router
+from src.img.inventorycover import router as inventorycover_router
 
 def register_routes(app: FastAPI):
     app.include_router(auth_router)
@@ -13,3 +14,4 @@ def register_routes(app: FastAPI):
     app.include_router(items_router)
     app.include_router(history_router)
     app.include_router(avatar_router)
+    app.include_router(inventorycover_router)

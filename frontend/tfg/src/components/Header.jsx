@@ -27,7 +27,7 @@ function Header() {
     },
   ];
 
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const menuItemsToDisplay = isAuthenticated
     ? menu
