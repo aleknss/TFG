@@ -1,9 +1,12 @@
 import React from "react";
 
-const InventarioItem = ({ item }) => {
+const InventarioItem = ({ key, item }) => {
   return (
-    <div>
-      <div className="bg-gray-200 w-8 h-8">ea</div>
+    <div className="flex flex-col gap-2 w-7/12">
+      <div className="bg-gray-200 w-full h-24 rounded-md flex justify-center items-center hover:bg-white hover:cursor-pointer hover:shadow-2xl transition duration-300">
+      
+      </div>
+      <p className="text-center text-gray-200 text-sm">{item.nombre}</p>
     </div>
   );
 };

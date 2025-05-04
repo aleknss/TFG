@@ -7,7 +7,7 @@ function HeaderItem({ name, Icon, to }) {
       to={to}
       end
       className={({ isActive }) =>
-        `flex items-center gap-3 hover:cursor-pointer hover:text-secondary-color
+        `flex items-center gap-3 hover:cursor-pointer hover:text-secondary-color transition duration-200
        ${isActive ? "text-primary-color" : "text-black"}`
       }
     >

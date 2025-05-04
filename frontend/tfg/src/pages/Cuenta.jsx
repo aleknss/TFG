@@ -117,7 +117,6 @@ const Cuenta = () => {
       setPreviewUrl(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
 
-      // setUser(prevUser => ({ ...prevUser })); // Podría forzar re-render si fuera necesario
     } catch (err) {
       console.error("Error uploading image:", err);
       const errorMessage =

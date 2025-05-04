@@ -3,7 +3,7 @@ import defaultAvatar from "../assets/images/anon.jpg";
 
 export default function Avatar({ userId }) {
   const [failed, setFailed] = useState(false);
-  const url = `${import.meta.env.VITE_API_BASE_URL}/img/avatar/${userId}`;
+  const url = `${import.meta.env.VITE_API_BASE_URL}/img/avatar/${userId}?${Date.now()}`;
 
   if (failed) {
     return (

@@ -1,13 +1,16 @@
 # src/img/avatar.py
 
 import os
-import shutil
+import io
 from pathlib import Path
 from typing import Optional
 
+from ..auth.service import CurrentUser
 from fastapi import APIRouter, File, UploadFile, Query, HTTPException
 from fastapi.responses import FileResponse
 from fastapi.responses import JSONResponse
+
+from PIL import Image
 
 # BASE_DIR es /src/
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,38 +39,40 @@ def get_file_extension(filename: str, content_type: Optional[str] = None) -> Opt
 
 @router.post("/change-avatar")
 async def change_avatar(
+    current_user: CurrentUser,
     user_id: int = Query(..., description="The ID of the user updating the avatar"),
     avatar: UploadFile = File(..., description="The avatar image file to upload")
 ):
-    print(f"ID Usuario: {user_id}")
-    print(f"Nombre de archivo='{avatar.filename}', tipo='{avatar.content_type}'")
-
-    file_extension = get_file_extension(avatar.filename, avatar.content_type)
-    if not file_extension:
-        await avatar.close()
+    if (current_user.user_id != user_id):
+        raise HTTPException(
+            status_code=401,
+            detail="No tienes permisos para cambiar el avatar de otro usuario."
+        )
+    
+    contents = await avatar.read()
+    await avatar.close()
+    try:
+        image = Image.open(io.BytesIO(contents))
+    except Exception as e:
         raise HTTPException(
             status_code=400,
-            detail=f"Formato inválido. Received: {avatar.content_type or 'unknown'}"
+            detail=f"Archivo no es una imagen válida: {e}"
         )
 
     safe_user_id = str(user_id)
-    new_filename = f"{safe_user_id}{file_extension}"
+    new_filename = f"{safe_user_id}.png"
     save_path = UPLOAD_DIR_PFP / new_filename
 
     print(f"Guardar en: {save_path}")
 
     try:
-        with open(save_path, "wb") as buffer:
-            await avatar.seek(0)
-            shutil.copyfileobj(avatar.file, buffer)
+        image.save(save_path, format="PNG")
     except IOError as e:
         print(f"ERROR guardando: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"No se ha podido guardar. Error: {e}"
         )
-    finally:
-        await avatar.close()
 
     print(f"Archivo guardado: {save_path}")
 
@@ -80,6 +85,7 @@ async def change_avatar(
             "avatarUrl": file_url_path
         }
     )
+
 
 @router.get("/avatar/{user_id}")
 async def get_avatar(user_id: int):

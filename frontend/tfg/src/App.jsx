@@ -7,6 +7,8 @@ import Login from "./pages/Login";
 import Inventarios from "./pages/Inventarios";
 import Articulos from "./pages/Articulos";
 import Cuenta from "./pages/Cuenta";
+import AddInventario from "./components/AddInventario";
+import InventarioView from "./components/InventarioView";
 import ProtectedRoute from "./context/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
@@ -22,7 +24,11 @@ const App = () => {
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route element={<ProtectedRoute />}>
-                <Route path="/inventarios" element={<Inventarios />} />
+                <Route path="/inventarios" element={<Inventarios />}>
+                  <Route index element={<Home />} />
+                  <Route path="create" element={<AddInventario />} />
+                  <Route path=":id" element={<InventarioView />} />
+                </Route>
                 <Route path="/articulos" element={<Articulos />} />
                 <Route path="/cuenta" element={<Cuenta />} />
                 <Route path="*" element={<Home />} />
