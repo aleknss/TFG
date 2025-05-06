@@ -1,5 +1,5 @@
 import React from "react";
-import InventarioCover from "./InventarioCover";
+import InventarioCover from "./InventarioView/InventarioCover";
 
 const InventarioItem = ({ key, item }) => {
   return (

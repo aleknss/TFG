@@ -1,4 +1,3 @@
-// src/App.jsx
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
@@ -9,6 +8,7 @@ import Articulos from "./pages/Articulos";
 import Cuenta from "./pages/Cuenta";
 import AddInventario from "./components/Inventario/AddInventario";
 import InventarioView from "./components/Inventario/InventarioView";
+import InventarioDefault from "./components/Inventario/InventarioDefault";
 import ProtectedRoute from "./context/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
@@ -25,7 +25,7 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/inventarios" element={<Inventarios />}>
-                  <Route index element={<Home />} />
+                  <Route index element={<InventarioDefault />} />
                   <Route path="create" element={<AddInventario />} />
                   <Route path=":id" element={<InventarioView />} />
                 </Route>

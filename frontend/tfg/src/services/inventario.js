@@ -15,3 +15,7 @@ export const createInventario = (data) => {
 export const deleteInventario = (id) => {
   return api.delete(`/inventories/${id}`);
 };
+
+export const updateInventario = (id, data) => {
+  return api.put(`/inventories/${id}`, data);
+};

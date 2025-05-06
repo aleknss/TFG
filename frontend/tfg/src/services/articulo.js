@@ -14,6 +14,11 @@ export const fetchArticulosByInventory = (inventory_id) => {
     return api.get(`/items/inv/${inventory_id}`);
 };
 
+export const updateArticulo = (id, data) => {
+    return api.put(`/items/${id}`, data);
+};
+
+
 /* Histórico */
 
 export const fetchHistoryByArticulo = (articulo_id) => {

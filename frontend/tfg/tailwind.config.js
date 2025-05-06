@@ -6,6 +6,9 @@ export default {
       colors: {
         "primary-color": "#1C4E80",
         "secondary-color": "#5695D4",
+        "rojo": "#E40039",
+        "azul": "#4193AC",
+        "amarillo": "#FFD045"
       },
       fontFamily: {
         montserrat: ["Montserrat", "sans-serif"],
