@@ -1,18 +1,19 @@
-import React from "react";
-import { Line } from "react-chartjs-2";
+import React from 'react';
+import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  CategoryScale,
+  CategoryScale, // Aunque no se use directamente para 'time', es bueno tenerlo si se mezcla
   LinearScale,
   PointElement,
   LineElement,
   Title,
   Tooltip,
   Legend,
-  TimeScale,
-} from "chart.js";
-import "chartjs-adapter-date-fns";
-import { es } from "date-fns/locale";
+  TimeScale,     
+  TimeSeriesScale 
+} from 'chart.js';
+import { es } from 'date-fns/locale'; 
+import 'chartjs-adapter-date-fns';
 
 ChartJS.register(
   CategoryScale,
@@ -22,31 +23,35 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  TimeScale
+  TimeScale,
+  TimeSeriesScale
 );
 
 const Grafico = ({ datasets }) => {
+  console.log("Grafico - Datasets recibidos:", JSON.stringify(datasets));
   const chartData = React.useMemo(() => {
-    // Mapear los datos de entrada para asegurar que 'x' sea un objeto Date
+    console.log("Grafico - Recalculando chartData..."); // Para ver si se recalcula demasiado
+    if (!datasets || datasets.length === 0) {
+      return { datasets: [] }; 
+    }
     const processedDatasets = datasets.map((ds) => ({
-      ...ds, // Copia todas las propiedades del dataset (label, borderColor, etc.)
-      data: ds.data.map((item) => ({
-        x: new Date(item.tiempo), // Convertir string de tiempo a objeto Date
+      ...ds,
+      data: Array.isArray(ds.data) ? ds.data.map((item) => ({
+        x: new Date(item.tiempo),
         y: item.valor,
-      })),
+      })) : [],
     }));
 
+    console.log("Grafico - Processed chartData:", JSON.stringify(processedDatasets));
     return {
-      datasets: processedDatasets, // Objeto principal para el prop 'data' de <Line>
+      datasets: processedDatasets,
     };
-  }, [datasets]); // Dependencia: `datasets`
+  }, [datasets]);
 
   const options = React.useMemo(
     () => ({
-      // Memoizar también las opciones
       responsive: true,
       maintainAspectRatio: false,
-      // ... (resto de tus opciones)
       plugins: {
         legend: {
           position: "top",
@@ -61,7 +66,7 @@ const Grafico = ({ datasets }) => {
           intersect: false,
           callbacks: {
             title: function (tooltipItems) {
-              if (tooltipItems.length > 0) {
+              if (tooltipItems.length > 0 && tooltipItems[0].parsed) { // Añadir chequeo para parsed
                 const date = new Date(tooltipItems[0].parsed.x);
                 return date.toLocaleDateString("es-ES", {
                   day: "numeric",
@@ -83,14 +88,14 @@ const Grafico = ({ datasets }) => {
             unit: "day",
             tooltipFormat: "PPpp",
             displayFormats: {
-              hour: "HH:mm",
-              day: "dd MMM yy",
-              month: "MMM yyyy",
+              hour: "HH:mm",      
+              day: "dd MMM yy",   
+              month: "MMM yyyy",   
             },
           },
-          adapters: {
+          adapters: { 
             date: {
-              locale: es,
+              locale: es, 
             },
           },
           title: {
@@ -107,6 +112,7 @@ const Grafico = ({ datasets }) => {
             display: true,
             text: "Cantidad",
           },
+          suggestedMin: 0,
           grid: {
             color: "rgba(0, 0, 0, 0.05)",
           },
@@ -127,8 +133,8 @@ const Grafico = ({ datasets }) => {
         },
       },
     }),
-    []
-  ); // El array de dependencias de options es vacío porque no depende de props
+    [] 
+  );
 
   const noData =
     !datasets || datasets.every((ds) => !ds.data || ds.data.length === 0);
@@ -140,6 +146,9 @@ const Grafico = ({ datasets }) => {
       </div>
     );
   }
+
+  console.log("Grafico - Renderizando Line con options:", options);
+  console.log("Grafico - Renderizando Line con data:", chartData);
 
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>

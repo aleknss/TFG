@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { HiPencil, HiCheck, HiX } from 'react-icons/hi';
 import { updateArticulo } from '../../../services/articulo';
 
-export default function Articulo({ id, color, articulo, descripcion, onUpdateSuccess }) {
+export default function Articulo({ id, color, articulo, descripcion, onUpdateSuccess, cantidad }) {
     const [isEditing, setIsEditing] = useState(false);
     const [editedArticulo, setEditedArticulo] = useState(articulo);
     const [editedDescripcion, setEditedDescripcion] = useState(descripcion);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [articuloItem, setArticuloItem] = useState(articulo);
+    const [descripcionItem, setDescripcionItem] = useState(descripcion);
 
     const handleEditClick = () => {
         setEditedArticulo(articulo);
@@ -33,6 +35,8 @@ export default function Articulo({ id, color, articulo, descripcion, onUpdateSuc
             setIsEditing(false);
             if (onUpdateSuccess) {
                 onUpdateSuccess(id, updatedData);
+                setArticuloItem(editedArticulo);
+                setDescripcionItem(editedDescripcion);
             }
         } catch (err) {
             console.error("Failed to update item:", err);
@@ -74,7 +78,7 @@ export default function Articulo({ id, color, articulo, descripcion, onUpdateSuc
                         className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center gap-1" 
                     >
                         <HiX className="w-4 h-4" />
-                        Cancel
+                        Cancelar
                     </button>
                     <button
                         onClick={handleSaveClick}
@@ -82,11 +86,11 @@ export default function Articulo({ id, color, articulo, descripcion, onUpdateSuc
                         className={`px-3 py-1 text-sm text-white rounded ${
                             isLoading
                             ? 'bg-blue-300 cursor-not-allowed'
-                            : 'bg-blue-500 hover:bg-blue-600'
+                            : 'bg-primary-color hover:bg-tertiary-color'
                         } disabled:opacity-70 flex items-center gap-1`}
                     >
                         <HiCheck className="w-4 h-4" /> 
-                        {isLoading ? 'Saving...' : 'Save'}
+                        {isLoading ? 'Guardando...' : 'Guardar'}
                     </button>
                 </div>
             </div>
@@ -99,12 +103,12 @@ export default function Articulo({ id, color, articulo, descripcion, onUpdateSuc
                 <circle r="10" cx="10" cy="10" fill={color} />
             </svg>
             <div className="flex-grow flex flex-col sm:flex-row sm:items-center sm:gap-2 min-w-0"> 
-                <span className="font-medium truncate">{articulo}</span> 
-                <span className="text-gray-600 text-sm truncate">{descripcion}</span> 
+                <span className="font-medium truncate"> ({cantidad}) {articuloItem}</span> 
+                <span className="text-gray-600 text-sm truncate">{descripcionItem}</span>
             </div>
             <button
                  onClick={handleEditClick}
-                 className="ml-auto p-1.5 rounded text-gray-500 hover:text-blue-600 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:text-blue-600 transition-all duration-150 flex-shrink-0" 
+                 className="ml-auto p-1.5 rounded-full text-gray-500 hover:text-primary-color hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-primary-color  transition-all duration-150 flex-shrink-0" 
                  aria-label={`Edit ${articulo}`} 
             >
                 <HiPencil className="w-5 h-5" /> 

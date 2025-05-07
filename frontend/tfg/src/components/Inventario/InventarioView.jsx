@@ -49,10 +49,7 @@ const InventarioView = () => {
       }
 
       setLoading(true);
-      setError(null); // Resetear error al cargar nuevos datos
-      // No es necesario resetear articulos o chartDatasets aquí si el segundo useEffect se encarga
-      // setArticulos([]);
-      // setChartDatasets([]);
+      setError(null);
       setSelectedFile(null);
       setImagePreviewUrl(null);
       setImageError("");
@@ -64,10 +61,9 @@ const InventarioView = () => {
 
         const articulosResponse = await fetchArticulosByInventory(id);
         const fetchedArticulos = articulosResponse.data || [];
-        setArticulos(fetchedArticulos); // Esto disparará el segundo useEffect si es necesario
+        setArticulos(fetchedArticulos);
       } catch (err) {
         console.error("Error fetching inventory data:", err);
-        // Simplificado, ya que 'inventario' aún no estaría seteado en el primer error
         setError(new Error(`Error al cargar datos: ${err.message}`));
       } finally {
         setLoading(false);
@@ -75,7 +71,7 @@ const InventarioView = () => {
     };
 
     loadData();
-  }, [id]); // <--- CAMBIO AQUÍ: Solo 'id' como dependencia
+  }, [id]);
 
   useEffect(() => {
     const loadHistoricalData = async () => {
@@ -83,14 +79,13 @@ const InventarioView = () => {
       const articlesForChart = articulos.slice(0, 3);
 
       const historyPromises = articlesForChart.map(async (articulo, i) => {
-        if (!articulo || !articulo.id) return null; // Si el artículo no es válido, se filtrará
+        if (!articulo || !articulo.id) return null; 
 
         try {
           const historyResponse = await fetchLastTenHistoryByArticulo(
             articulo.id
           );
 
-          // Verificar si hay datos y si el array no está vacío
           if (historyResponse.data && historyResponse.data.length > 0) {
             const historyData = historyResponse.data
               .map((record) => ({
@@ -100,7 +95,6 @@ const InventarioView = () => {
               .sort((a, b) => new Date(a.tiempo) - new Date(b.tiempo));
 
             return {
-              // Solo retorna el dataset si hay datos válidos
               label: articulo.nombre || `Artículo ${i + 1}`,
               data: historyData,
               borderColor: colors[i % colors.length],
@@ -109,7 +103,6 @@ const InventarioView = () => {
               fill: false,
             };
           } else {
-            // Si no hay datos para este artículo, retornamos null para omitirlo
             console.log(
               `No hay datos históricos para ${
                 articulo.nombre || `Artículo ${i + 1}`
@@ -122,7 +115,6 @@ const InventarioView = () => {
             `Error fetching history for articulo ${articulo.id} (${articulo.nombre}):`,
             err
           );
-          // Si hay un error al cargar, también retornamos null para omitir esta línea
           return null;
         }
       });
@@ -476,8 +468,8 @@ const InventarioView = () => {
         <hr className="my-4" />
 
         <div id="articulos" className="bg-white shadow-md rounded-lg p-4">
-          <h2 className="text-xl font-semibold mb-3 text-gray-700">
-            Artículos en este Inventario ({articulos.length})
+          <h2 className="text-xl font-semibold mb-3">
+            Artículos
           </h2>
           {articulos.length > 0 ? (
             <div className="space-y-3">
@@ -498,6 +490,7 @@ const InventarioView = () => {
                     articulo={item.nombre}
                     color={color}
                     descripcion={item.descripcion}
+                    cantidad={item.cantidad_actual}
                     onUpdateSuccess={(updatedData) =>
                       handleUpdateSuccess(item.id, updatedData)
                     }
@@ -519,9 +512,9 @@ const InventarioView = () => {
         </div>
       </div>
 
-      <div className="bg-white shadow-md rounded-lg p-4 box-border w-full lg:w-4/6 flex-grow h-[500px] lg:h-auto">
-        <h2 className="text-xl font-semibold mb-3 text-gray-700">
-          Historial de Cantidad
+      <div className="bg-white shadow-md rounded-lg p-12 box-border w-full lg:w-4/6 flex-grow h-[500px]">
+        <h2 className="text-xl font-semibold mb-3">
+          Historial
         </h2>
         {chartLoading ? (
           <div className="flex justify-center items-center h-full">
