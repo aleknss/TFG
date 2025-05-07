@@ -1,6 +1,7 @@
-FROM alpine:3.21
+FROM python:3.13-alpine
 WORKDIR /app
-COPY requirements.txt-dev .
+COPY requirements.txt .
+COPY requirements-dev.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements-dev.txt
 COPY . .
 EXPOSE 8000

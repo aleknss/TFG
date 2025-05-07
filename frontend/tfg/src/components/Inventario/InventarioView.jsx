@@ -2,24 +2,24 @@ import React, { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { HiCamera, HiCheck, HiX, HiPencil } from "react-icons/hi";
 import Articulo from "./InventarioView/Articulo";
-import { updateInventario } from "../../services/inventario";
+import Grafico from "./InventarioView/Grafico";
+import InventarioCover from "./InventarioView/InventarioCover";
 
 import api from "../../services/api";
 import {
   fetchInventarioById,
   deleteInventario,
+  updateInventario,
 } from "../../services/inventario";
 import {
   fetchArticulosByInventory,
   fetchLastTenHistoryByArticulo,
 } from "../../services/articulo";
-import InventarioCover from "./InventarioView/InventarioCover";
 
 const InventarioView = () => {
   const { id } = useParams();
   const [inventario, setInventario] = useState(null);
   const [articulos, setArticulos] = useState([]);
-  const [historicos, setHistoricos] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -35,7 +35,10 @@ const InventarioView = () => {
   const [nameLoading, setNameLoading] = useState(false);
   const [nameError, setNameError] = useState(null);
 
-  const colors = ["#E40039", "#4193AC", "#FFD045"];
+  const [chartDatasets, setChartDatasets] = useState([]);
+  const [chartLoading, setChartLoading] = useState(false);
+
+  const colors = ["#E40039", "#4193AC", "#FFD045", "#00A859", "#F37021"];
 
   useEffect(() => {
     const loadData = async () => {
@@ -46,9 +49,10 @@ const InventarioView = () => {
       }
 
       setLoading(true);
-      setError(null);
-      setArticulos([]);
-      setHistoricos({});
+      setError(null); // Resetear error al cargar nuevos datos
+      // No es necesario resetear articulos o chartDatasets aquí si el segundo useEffect se encarga
+      // setArticulos([]);
+      // setChartDatasets([]);
       setSelectedFile(null);
       setImagePreviewUrl(null);
       setImageError("");
@@ -60,59 +64,100 @@ const InventarioView = () => {
 
         const articulosResponse = await fetchArticulosByInventory(id);
         const fetchedArticulos = articulosResponse.data || [];
-        setArticulos(fetchedArticulos);
-
-        if (fetchedArticulos.length > 0) {
-          const historyPromises = fetchedArticulos.map((articulo) =>
-            fetchLastTenHistoryByArticulo(articulo.id)
-              .then((response) => ({
-                articuloId: articulo.id,
-                data: response.data || [],
-              }))
-              .catch((err) => {
-                console.warn(
-                  `Error fetching history for articulo ${articulo.id}:`,
-                  err
-                );
-                return { articuloId: articulo.id, data: [], error: true };
-              })
-          );
-          const historyResults = await Promise.all(historyPromises);
-          const newHistoricos = {};
-          historyResults.forEach((result) => {
-            if (result && !result.error) {
-              newHistoricos[result.articuloId] = result.data;
-            } else {
-              newHistoricos[result.articuloId] = [];
-            }
-          });
-          setHistoricos(newHistoricos);
-        }
+        setArticulos(fetchedArticulos); // Esto disparará el segundo useEffect si es necesario
       } catch (err) {
         console.error("Error fetching inventory data:", err);
-        if (!inventario) {
-          setError(
-            new Error(`Error al cargar el inventario base: ${err.message}`)
-          );
-        } else {
-          setError(
-            new Error(`Error al cargar artículos o historiales: ${err.message}`)
-          );
-        }
+        // Simplificado, ya que 'inventario' aún no estaría seteado en el primer error
+        setError(new Error(`Error al cargar datos: ${err.message}`));
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
-  }, [id]);
+  }, [id]); // <--- CAMBIO AQUÍ: Solo 'id' como dependencia
+
+  useEffect(() => {
+    const loadHistoricalData = async () => {
+      setChartLoading(true);
+      const articlesForChart = articulos.slice(0, 3);
+
+      const historyPromises = articlesForChart.map(async (articulo, i) => {
+        if (!articulo || !articulo.id) return null; // Si el artículo no es válido, se filtrará
+
+        try {
+          const historyResponse = await fetchLastTenHistoryByArticulo(
+            articulo.id
+          );
+
+          // Verificar si hay datos y si el array no está vacío
+          if (historyResponse.data && historyResponse.data.length > 0) {
+            const historyData = historyResponse.data
+              .map((record) => ({
+                tiempo: record.fecha_registro,
+                valor: record.cantidad,
+              }))
+              .sort((a, b) => new Date(a.tiempo) - new Date(b.tiempo));
+
+            return {
+              // Solo retorna el dataset si hay datos válidos
+              label: articulo.nombre || `Artículo ${i + 1}`,
+              data: historyData,
+              borderColor: colors[i % colors.length],
+              backgroundColor: `${colors[i % colors.length]}33`,
+              tension: 0.1,
+              fill: false,
+            };
+          } else {
+            // Si no hay datos para este artículo, retornamos null para omitirlo
+            console.log(
+              `No hay datos históricos para ${
+                articulo.nombre || `Artículo ${i + 1}`
+              }`
+            );
+            return null;
+          }
+        } catch (err) {
+          console.error(
+            `Error fetching history for articulo ${articulo.id} (${articulo.nombre}):`,
+            err
+          );
+          // Si hay un error al cargar, también retornamos null para omitir esta línea
+          return null;
+        }
+      });
+
+      const resolvedDatasets = (await Promise.all(historyPromises)).filter(
+        (ds) => ds !== null
+      );
+
+      setChartDatasets(resolvedDatasets);
+      setChartLoading(false);
+    };
+
+    if (articulos && articulos.length > 0) {
+      loadHistoricalData();
+    } else {
+      setChartDatasets([]);
+      setChartLoading(false);
+    }
+  }, [articulos]);
 
   const handleDelete = async () => {
-    try {
-      await deleteInventario(id);
-      window.location.href = "/inventarios";
-    } catch (err) {
-      console.error("Error deleting inventory:", err);
+    if (
+      window.confirm(
+        `¿Estás seguro de que quieres borrar el inventario "${
+          inventario?.nombre || id
+        }"? Esta acción no se puede deshacer.`
+      )
+    ) {
+      try {
+        await deleteInventario(id);
+        window.location.href = "/inventarios";
+      } catch (err) {
+        console.error("Error deleting inventory:", err);
+        alert(`Error al borrar el inventario: ${err.message}`);
+      }
     }
   };
 
@@ -187,7 +232,6 @@ const InventarioView = () => {
     }
   };
 
-  // editar nombre
   const handleEditNameClick = () => {
     setEditedName(inventario?.nombre || "");
     setIsEditingName(true);
@@ -200,8 +244,10 @@ const InventarioView = () => {
   };
 
   const handleSaveNameClick = async () => {
-    if (!id || editedName === inventario?.nombre) {
+    if (!id || editedName.trim() === "" || editedName === inventario?.nombre) {
       setIsEditingName(false);
+      if (editedName.trim() === "")
+        setNameError("El nombre no puede estar vacío.");
       return;
     }
 
@@ -232,210 +278,265 @@ const InventarioView = () => {
     }
   };
 
-  const handleUpdateSuccess = (id, updatedData) => {
+  const handleUpdateSuccess = (updatedArticuloId, updatedData) => {
     setArticulos((currentArticulos) =>
       currentArticulos.map((item) =>
-        item.id === id ? { ...item, ...updatedData } : item
+        item.id === updatedArticuloId ? { ...item, ...updatedData } : item
       )
     );
-    console.log(`Articulo ${id} updated successfully!`);
+    console.log(`Articulo ${updatedArticuloId} updated successfully!`);
   };
 
   if (loading && !inventario) {
-    return <div>Cargando datos del inventario {id}...</div>;
+    return (
+      <div className="p-4 text-center">
+        Cargando datos del inventario {id}...
+      </div>
+    );
   }
 
   if (error && !inventario) {
     return (
-      <div>
+      <div className="p-4 text-center text-red-600">
         Error al cargar el inventario: {error.message || "Error desconocido"}
       </div>
     );
   }
 
   if (!inventario) {
-    return <div>No se encontró el inventario con ID {id}.</div>;
+    return (
+      <div className="p-4 text-center">
+        No se encontró el inventario con ID {id}.
+      </div>
+    );
   }
 
   const numericId = parseInt(id, 10);
 
   return (
-    <div className="p-5 w-full">
-      <div className="flex flex-col md:flex-row gap-5 mb-5">
-        <div className="relative w-full md:w-48 h-48 flex-shrink-0 group">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            style={{ display: "none" }}
-            disabled={imageLoading}
-          />
-
-          <div className="w-full h-full">
-            {imagePreviewUrl ? (
-              <img
-                src={imagePreviewUrl}
-                alt="Previsualización de portada"
-                className="rounded-md object-cover w-full h-full border border-gray-300"
-              />
-            ) : (
-              !isNaN(numericId) && (
-                <InventarioCover
-                  inventarioId={numericId}
-                  cacheKey={imageCacheKey}
+    <div className="w-full flex flex-col lg:flex-row gap-4 p-4" id="main">
+      <div id="left" className="flex flex-col gap-4 w-full lg:w-2/6">
+        <div
+          id="inventario"
+          className="bg-white shadow-md rounded-lg p-4 flex flex-col md:flex-row gap-4"
+        >
+          <div className="relative flex w-full md:w-48 h-48 flex-shrink-0 group mx-auto md:mx-0">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              style={{ display: "none" }}
+              disabled={imageLoading}
+            />
+            <div className="w-full h-full rounded-md overflow-hidden border border-gray-300">
+              {imagePreviewUrl ? (
+                <img
+                  src={imagePreviewUrl}
+                  alt="Previsualización de portada"
+                  className="object-cover w-full h-full"
                 />
-              )
+              ) : (
+                !isNaN(numericId) && (
+                  <InventarioCover
+                    inventarioId={numericId}
+                    cacheKey={imageCacheKey}
+                  />
+                )
+              )}
+            </div>
+            <div
+              className={`absolute inset-0 bg-black flex items-center justify-center rounded-md transition-opacity duration-300 ${
+                imageLoading
+                  ? "bg-opacity-50 cursor-default"
+                  : "bg-opacity-0 group-hover:bg-opacity-40 cursor-pointer opacity-0 group-hover:opacity-100"
+              }`}
+              onClick={handleImageClick}
+              title="Cambiar imagen de portada"
+            >
+              {!imageLoading && <HiCamera className="text-white text-4xl" />}
+              {imageLoading && (
+                <div className="text-white animate-pulse">Cargando...</div>
+              )}
+            </div>
+            {selectedFile && !imageLoading && (
+              <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 w-auto flex justify-center gap-2 p-1 bg-black bg-opacity-60 rounded">
+                <button
+                  className="bg-primary-color text-white px-3 py-1 rounded hover:bg-secondary-color disabled:opacity-50 text-xs flex items-center gap-1"
+                  onClick={handleImageUpload}
+                  disabled={imageLoading}
+                >
+                  <HiCheck /> Guardar
+                </button>
+                <button
+                  className="bg-rojo text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-xs flex items-center gap-1"
+                  onClick={handleCancelUpload}
+                  disabled={imageLoading}
+                >
+                  <HiX /> Cancelar
+                </button>
+              </div>
+            )}
+            {imageError && (
+              <div className="absolute top-2 left-2 right-2 text-center text-red-600 bg-white bg-opacity-80 p-1 rounded text-xs font-medium">
+                {imageError}
+              </div>
             )}
           </div>
 
-          <div
-            className={`absolute inset-0 bg-black flex items-center justify-center rounded-md transition-opacity duration-300 ${
-              imageLoading
-                ? "bg-opacity-50 cursor-default"
-                : "bg-opacity-0 group-hover:bg-opacity-40 cursor-pointer opacity-0 group-hover:opacity-100"
-            }`}
-            onClick={handleImageClick}
-            title="Cambiar imagen de portada"
-          >
-            {!imageLoading && <HiCamera className="text-white text-4xl" />}
-            {imageLoading && <div className="text-white">Cargando...</div>}
+          <div className="flex-grow flex flex-col justify-between">
+            <div id="nombre" className="mb-2">
+              {isEditingName ? (
+                <div className="flex flex-col gap-1 w-full">
+                  <div className="flex items-center gap-2">
+                    <strong className="text-lg flex-shrink-0">Nombre:</strong>
+                    <input
+                      type="text"
+                      value={editedName}
+                      onChange={(e) => setEditedName(e.target.value)}
+                      className="border rounded px-2 py-1 text-lg flex-grow focus:outline-none focus:ring-2 focus:ring-primary-color"
+                      disabled={nameLoading}
+                      aria-label="Editar Nombre del Inventario"
+                      autoFocus
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && handleSaveNameClick()
+                      }
+                    />
+                  </div>
+                  {nameError && (
+                    <p className="text-red-500 text-xs mt-1">{nameError}</p>
+                  )}
+                  <div className="flex flex-row gap-2 justify-start mt-2">
+                    <button
+                      onClick={handleSaveNameClick}
+                      disabled={nameLoading || editedName.trim() === ""}
+                      className={`px-3 py-1 text-sm text-white rounded flex items-center gap-1 ${
+                        nameLoading || editedName.trim() === ""
+                          ? "bg-blue-300 cursor-not-allowed"
+                          : "bg-blue-500 hover:bg-blue-600"
+                      } disabled:opacity-70`}
+                    >
+                      <HiCheck className="w-4 h-4" />
+                      {nameLoading ? "Guardando..." : "Guardar"}
+                    </button>
+                    <button
+                      onClick={handleCancelNameClick}
+                      disabled={nameLoading}
+                      className="px-3 py-1 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center gap-1"
+                    >
+                      <HiX className="w-4 h-4" />
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <h1 className="text-2xl font-bold text-gray-800 break-all">
+                    {inventario.nombre || "Inventario Sin Nombre"}
+                  </h1>
+                  <button
+                    onClick={handleEditNameClick}
+                    className="ml-2 p-1.5 rounded-full text-gray-500 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:text-blue-600 transition-all duration-150 flex-shrink-0"
+                    aria-label="Editar nombre del inventario"
+                  >
+                    <HiPencil className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </div>
+            <p className="text-sm text-gray-500">
+              Creado:{" "}
+              {inventario.creado_en
+                ? new Date(inventario.creado_en).toLocaleDateString("es-ES", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })
+                : "N/A"}
+            </p>
+            {loading && inventario && (
+              <p className="text-sm italic text-gray-500 mt-1">
+                Actualizando datos...
+              </p>
+            )}
+            {error && inventario && (
+              <p className="text-orange-600 mt-1 text-sm">
+                Advertencia: {error.message}
+              </p>
+            )}
+            <button
+              onClick={handleDelete}
+              className="mt-auto bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:opacity-50 text-base w-full md:w-auto self-start"
+            >
+              Borrar Inventario
+            </button>
           </div>
-
-          {selectedFile && (
-            <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 p-1 bg-black bg-opacity-50 rounded">
-              <button
-                className="bg-primary-color text-white px-3 py-1 rounded hover:bg-secondary-color disabled:opacity-50 text-sm flex items-center gap-1"
-                onClick={handleImageUpload}
-                disabled={imageLoading}
-              >
-                <HiCheck /> {imageLoading ? "Subiendo..." : "Guardar"}
-              </button>
-              <button
-                className="bg-rojo text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-sm flex items-center gap-1"
-                onClick={handleCancelUpload}
-                disabled={imageLoading}
-              >
-                <HiX /> Cancelar
-              </button>
-            </div>
-          )}
-          {imageError && (
-            <div className="absolute top-2 left-2 right-2 text-center text-red-600 bg-white bg-opacity-80 p-1 rounded text-xs font-medium">
-              {imageError}
-            </div>
-          )}
         </div>
 
-        <div className="flex-grow">
-          <div className="flex items-center gap-2 flex-wrap mb-1">
-            {isEditingName ? (
-              <div className="flex flex-col gap-1 w-full sm:w-auto">
-                <div className="flex items-center gap-2">
-                  <strong className="flex-shrink-0">Nombre:</strong>
-                  <input
-                    type="text"
-                    value={editedName}
-                    onChange={(e) => setEditedName(e.target.value)}
-                    className="border rounded px-2 py-1 flex-grow text-base focus:outline-none focus:ring-1 focus:ring-blue-500"
-                    disabled={nameLoading}
-                    aria-label="Editar Nombre del Inventario"
-                    autoFocus
-                  />
-                </div>
-                {nameError && (
-                  <p className="text-red-500 text-xs mt-1">{nameError}</p>
-                )}
-                <div className="flex flex-row gap-2 justify-start mt-1">
-                  <button
-                    onClick={handleSaveNameClick}
-                    disabled={nameLoading}
-                    className={`px-3 py-1 text-sm text-white rounded flex items-center gap-1 ${
-                      nameLoading
-                        ? "bg-blue-300 cursor-not-allowed"
-                        : "bg-blue-500 hover:bg-blue-600"
-                    } disabled:opacity-70`}
-                  >
-                    <HiCheck className="w-4 h-4" />
-                    {nameLoading ? "Guardando..." : "Guardar"}
-                  </button>
-                  <button
-                    onClick={handleCancelNameClick}
-                    disabled={nameLoading}
-                    className="px-3 py-1 text-sm bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 flex items-center gap-1"
-                  >
-                    <HiX className="w-4 h-4" />
-                    Cancelar
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <p className="flex-grow min-w-0 text-lg">
-                  <strong>Nombre:</strong> {inventario.nombre || "N/A"}
-                </p>
-                <button
-                  onClick={handleEditNameClick}
-                  className="ml-2 p-1.5 rounded text-gray-500 hover:text-blue-600 hover:bg-gray-200 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:text-blue-600 transition-all duration-150 flex-shrink-0"
-                  aria-label="Editar nombre del inventario"
-                >
-                  <HiPencil className="w-5 h-5" />
-                </button>
-              </>
-            )}
-          </div>
+        <hr className="my-4" />
 
-          <p>
-            <strong>Creado en:</strong>{" "}
-            {inventario.creado_en
-              ? new Date(inventario.creado_en).toLocaleString()
-              : "N/A"}
-          </p>
-          {loading && inventario && (
-            <p className="text-sm italic text-gray-500 mt-2">
-              Actualizando datos...
+        <div id="articulos" className="bg-white shadow-md rounded-lg p-4">
+          <h2 className="text-xl font-semibold mb-3 text-gray-700">
+            Artículos en este Inventario ({articulos.length})
+          </h2>
+          {articulos.length > 0 ? (
+            <div className="space-y-3">
+              {articulos.slice(0, 3).map((item, index) => {
+                if (!item || typeof item.nombre === "undefined") {
+                  console.warn(`Item at index ${index} is invalid:`, item);
+                  return (
+                    <div key={`invalid-item-${index}`} className="text-red-500">
+                      Artículo inválido detectado.
+                    </div>
+                  );
+                }
+                const color = colors[index % colors.length];
+
+                return (
+                  <Articulo
+                    key={item.id || `articulo-${index}`}
+                    articulo={item.nombre}
+                    color={color}
+                    descripcion={item.descripcion}
+                    onUpdateSuccess={(updatedData) =>
+                      handleUpdateSuccess(item.id, updatedData)
+                    }
+                    id={item.id}
+                  />
+                );
+              })}
+              {articulos.length > 3 && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Y {articulos.length - 3} más artículos...
+                </p>
+              )}
+            </div>
+          ) : (
+            <p className="text-gray-500">
+              No hay artículos en este inventario.
             </p>
           )}
-          {error && inventario && (
-            <p className="text-orange-600 mt-2">Advertencia: {error.message}</p>
-          )}
-
-          <button
-            onClick={handleDelete}
-            className="mt-5 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50 text-sm flex items-center gap-1"
-          >
-            Borrar
-          </button>
         </div>
       </div>
 
-      <hr className="my-5" />
-
-      <h2 className="text-xl font-semibold mb-3">
-        Artículos en este Inventario
-      </h2>
-
-      {articulos.slice(0, 3).map((item, index) => {
-        if (!item || typeof item.nombre === "undefined") {
-          console.warn(`Item at index ${index} is invalid:`, item);
-          return null;
-        }
-        const color = colors[index];
-        if (!color) {
-          console.warn(`No corresponding color found for index ${index}`);
-        }
-
-        return (
-          <Articulo
-            key={item.id || `Artículo-${index}`}
-            articulo={item.nombre}
-            color={color}
-            descripcion={item.descripcion}
-            onUpdateSuccess={handleUpdateSuccess}
-            id={item.id}
-          />
-        );
-      })}
+      <div className="bg-white shadow-md rounded-lg p-4 box-border w-full lg:w-4/6 flex-grow h-[500px] lg:h-auto">
+        <h2 className="text-xl font-semibold mb-3 text-gray-700">
+          Historial de Cantidad
+        </h2>
+        {chartLoading ? (
+          <div className="flex justify-center items-center h-full">
+            <p>Cargando datos del gráfico...</p>
+          </div>
+        ) : chartDatasets.length > 0 ? (
+          <Grafico datasets={chartDatasets} />
+        ) : (
+          <div className="flex justify-center items-center h-full">
+            <p className="text-gray-500">
+              No hay datos históricos para mostrar.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
