@@ -3,7 +3,6 @@ import { HiHome, HiUser, HiOutlineRss } from "react-icons/hi";
 import HeaderItem from "./HeaderItem";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import Avatar from "./Avatar";
 
 function Header() {
   const menu = [
@@ -47,9 +46,9 @@ function Header() {
           ))}
         </div>
         <div>
-          {isAuthenticated && user ? (
+          {isAuthenticated ? (
             <>
-              <p className="font-montserrat font-semibold text-primary-color select-none">
+              <p className="font-montserrat font-semibold text-primary-color select-none hidden lg:block">
                 {user.username}
               </p>
             </>

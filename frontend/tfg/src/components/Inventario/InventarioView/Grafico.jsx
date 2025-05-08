@@ -2,7 +2,7 @@ import React from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
-  CategoryScale, // Aunque no se use directamente para 'time', es bueno tenerlo si se mezcla
+  CategoryScale, 
   LinearScale,
   PointElement,
   LineElement,
@@ -28,9 +28,7 @@ ChartJS.register(
 );
 
 const Grafico = ({ datasets }) => {
-  console.log("Grafico - Datasets recibidos:", JSON.stringify(datasets));
   const chartData = React.useMemo(() => {
-    console.log("Grafico - Recalculando chartData..."); // Para ver si se recalcula demasiado
     if (!datasets || datasets.length === 0) {
       return { datasets: [] }; 
     }
@@ -42,7 +40,6 @@ const Grafico = ({ datasets }) => {
       })) : [],
     }));
 
-    console.log("Grafico - Processed chartData:", JSON.stringify(processedDatasets));
     return {
       datasets: processedDatasets,
     };
@@ -66,7 +63,7 @@ const Grafico = ({ datasets }) => {
           intersect: false,
           callbacks: {
             title: function (tooltipItems) {
-              if (tooltipItems.length > 0 && tooltipItems[0].parsed) { // Añadir chequeo para parsed
+              if (tooltipItems.length > 0 && tooltipItems[0].parsed) {
                 const date = new Date(tooltipItems[0].parsed.x);
                 return date.toLocaleDateString("es-ES", {
                   day: "numeric",
@@ -146,9 +143,6 @@ const Grafico = ({ datasets }) => {
       </div>
     );
   }
-
-  console.log("Grafico - Renderizando Line con options:", options);
-  console.log("Grafico - Renderizando Line con data:", chartData);
 
   return (
     <div style={{ position: "relative", height: "100%", width: "100%" }}>

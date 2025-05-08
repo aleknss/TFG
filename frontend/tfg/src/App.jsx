@@ -12,6 +12,8 @@ import InventarioDefault from "./components/Inventario/InventarioDefault";
 import ProtectedRoute from "./context/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import "./App.css";
+import MasInformacion from "./pages/MasInformacion";
+import Contacto from "./pages/Contacto";
 
 const App = () => {
   return (
@@ -22,6 +24,8 @@ const App = () => {
           <div className="content-container">
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/info" element={<MasInformacion />} />
+              <Route path="/contacto" element={<Contacto />} />
               <Route path="/login" element={<Login />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/inventarios" element={<Inventarios />}>

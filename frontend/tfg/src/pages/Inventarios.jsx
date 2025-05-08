@@ -43,7 +43,7 @@ const Inventarios = () => {
       <div id="fondo" className="w-full flex justify-end">
         <div
           id="main-content"
-          className="w-10/12 mt-12 flex flex-col justify-center items-center"
+          className="lg:w-10/12 w-full mt-12 flex flex-col justify-center items-center"
         >
           <Outlet />
         </div>
