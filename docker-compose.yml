@@ -1,40 +1,58 @@
 services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    env_file:
+      - ./backend/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80" 
+    env_file:
+      - ./frontend/.env
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-network
+
   db:
-    image: mariadb:10.5
-    restart: always
+    image: mariadb:10.11
+    ports:
+      - "3307:3306" 
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./database.sql:/docker-entrypoint-initdb.d/database.sql
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: tfg
       MYSQL_USER: root
       MYSQL_PASSWORD: root
-    volumes:
-      - db_data:/var/lib/mysql
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    depends_on:
-      - db
-    ports:
-      - "8000:8000"
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
-      DB_USER: appuser
-      DB_PASSWORD: apppass
-      DB_NAME: appdb
-
-  frontend:
-    build:
-      context: ./frontend/tfg
-      dockerfile: Dockerfile
-    depends_on:
-      - backend
-    ports:
-      - "3000:80"
-    environment:
-      VITE_API_URL: "http://localhost:8000"
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-P", "3306", "--user=root", "--password=root"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s 
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
-  db_data:
+  mariadb_data:
+
+networks:
+  app-network:
+    driver: bridge
