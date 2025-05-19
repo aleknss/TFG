@@ -1,8 +1,5 @@
-from datetime import datetime, timezone
 from sqlalchemy.orm import Session
-from fastapi import HTTPException
 from . import models
-from src.auth.models import TokenData
 from src.entities.item import Item
 from src.exceptions import ItemCreationError, ItemNotFoundError
 import logging
