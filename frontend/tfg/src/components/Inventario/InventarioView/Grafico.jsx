@@ -1,19 +1,19 @@
-import React from 'react';
-import { Line } from 'react-chartjs-2';
+import React from "react";
+import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
-  CategoryScale, 
+  CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
   Title,
   Tooltip,
   Legend,
-  TimeScale,     
-  TimeSeriesScale 
-} from 'chart.js';
-import { es } from 'date-fns/locale'; 
-import 'chartjs-adapter-date-fns';
+  TimeScale,
+  TimeSeriesScale,
+} from "chart.js";
+import { es } from "date-fns/locale";
+import "chartjs-adapter-date-fns";
 
 ChartJS.register(
   CategoryScale,
@@ -30,18 +30,58 @@ ChartJS.register(
 const Grafico = ({ datasets }) => {
   const chartData = React.useMemo(() => {
     if (!datasets || datasets.length === 0) {
-      return { datasets: [] }; 
+      return { datasets: [] };
     }
-    const processedDatasets = datasets.map((ds) => ({
-      ...ds,
-      data: Array.isArray(ds.data) ? ds.data.map((item) => ({
-        x: new Date(item.tiempo),
-        y: item.valor,
-      })) : [],
-    }));
+
+    let overallMaxTime = null;
+    const initialProcessedDatasets = datasets.map((ds) => {
+      const dataPoints = Array.isArray(ds.data)
+        ? ds.data.map((item) => {
+            const time = new Date(item.tiempo);
+            if (
+              overallMaxTime === null ||
+              time.getTime() > overallMaxTime.getTime()
+            ) {
+              overallMaxTime = time;
+            }
+            return {
+              x: time,
+              y: item.valor,
+            };
+          })
+        : [];
+      dataPoints.sort((a, b) => a.x.getTime() - b.x.getTime());
+      return {
+        ...ds,
+        data: dataPoints,
+      };
+    });
+
+    if (overallMaxTime === null) {
+      return { datasets: initialProcessedDatasets };
+    }
+
+    const finalProcessedDatasets = initialProcessedDatasets.map((ds) => {
+      if (ds.data.length > 0) {
+        const lastPoint = ds.data[ds.data.length - 1];
+        if (lastPoint.x.getTime() < overallMaxTime.getTime()) {
+          return {
+            ...ds,
+            data: [
+              ...ds.data,
+              {
+                x: overallMaxTime,
+                y: lastPoint.y,
+              },
+            ],
+          };
+        }
+      }
+      return ds;
+    });
 
     return {
-      datasets: processedDatasets,
+      datasets: finalProcessedDatasets,
     };
   }, [datasets]);
 
@@ -82,17 +122,17 @@ const Grafico = ({ datasets }) => {
         x: {
           type: "time",
           time: {
-            unit: "day",
+            unit: "minute",
             tooltipFormat: "PPpp",
             displayFormats: {
-              hour: "HH:mm",      
-              day: "dd MMM yy",   
-              month: "MMM yyyy",   
+              hour: "HH:mm",
+              day: "dd MMM yy",
+              month: "MMM yyyy",
             },
           },
-          adapters: { 
+          adapters: {
             date: {
-              locale: es, 
+              locale: es,
             },
           },
           title: {
@@ -130,7 +170,7 @@ const Grafico = ({ datasets }) => {
         },
       },
     }),
-    [] 
+    []
   );
 
   const noData =

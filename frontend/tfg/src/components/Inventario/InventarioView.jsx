@@ -44,7 +44,7 @@ const InventarioView = () => {
   const [chartDatasets, setChartDatasets] = useState([]);
   const [chartLoading, setChartLoading] = useState(false);
 
-  const colors = ["#E40039", "#4193AC", "#FFD045", "#00A859", "#F37021"];
+  const colors = ["#FFD045", "#4193AC", "#E40039"];
 
   useEffect(() => {
     if (authIsLoading) {
@@ -74,7 +74,12 @@ const InventarioView = () => {
         const inventarioResponse = await fetchInventarioById(id);
         const fetchedInventario = inventarioResponse.data;
 
-        if (user && fetchedInventario && typeof user.id !== 'undefined' && typeof fetchedInventario.usuario_id !== 'undefined') {
+        if (
+          user &&
+          fetchedInventario &&
+          typeof user.id !== "undefined" &&
+          typeof fetchedInventario.usuario_id !== "undefined"
+        ) {
           if (fetchedInventario.usuario_id !== user.id) {
             setAccessDenied(true);
             setInventario(null);
@@ -83,14 +88,15 @@ const InventarioView = () => {
             return;
           }
         } else {
-          console.warn("User ID or Inventario User ID is undefined, cannot perform access check.");
+          console.warn(
+            "User ID or Inventario User ID is undefined, cannot perform access check."
+          );
           setAccessDenied(true);
           setInventario(null);
           setArticulos([]);
           setLoading(false);
           return;
         }
-
 
         setInventario(fetchedInventario);
         setIsEditingName(false);
@@ -99,7 +105,6 @@ const InventarioView = () => {
         const articulosResponse = await fetchArticulosByInventory(id);
         const fetchedArticulos = articulosResponse.data || [];
         setArticulos(fetchedArticulos);
-
       } catch (err) {
         console.error("Error fetching inventory data:", err);
         if (err.response) {
@@ -107,9 +112,13 @@ const InventarioView = () => {
             setError(new Error(`Inventario con ID ${id} no encontrado.`));
           } else if (err.response.status === 403) {
             setAccessDenied(true);
-             setError(new Error("Acceso denegado por el servidor."));
+            setError(new Error("Acceso denegado por el servidor."));
           } else {
-            setError(new Error(`Error al cargar datos: ${err.message} (status: ${err.response.status})`));
+            setError(
+              new Error(
+                `Error al cargar datos: ${err.message} (status: ${err.response.status})`
+              )
+            );
           }
         } else {
           setError(new Error(`Error al cargar datos: ${err.message}`));
@@ -122,10 +131,10 @@ const InventarioView = () => {
     };
 
     if (id && user) {
-        loadData();
+      loadData();
     } else if (!id) {
-        setError(new Error("ID de inventario no proporcionado."));
-        setLoading(false);
+      setError(new Error("ID de inventario no proporcionado."));
+      setLoading(false);
     }
   }, [id, isAuthenticated, authIsLoading, navigate]);
 
@@ -205,7 +214,13 @@ const InventarioView = () => {
         navigate("/inventarios");
       } catch (err) {
         console.error("Error deleting inventory:", err);
-        setError(new Error(`Error al borrar el inventario: ${err.response?.data?.detail || err.message}`));
+        setError(
+          new Error(
+            `Error al borrar el inventario: ${
+              err.response?.data?.detail || err.message
+            }`
+          )
+        );
         setLoading(false);
       }
     }
@@ -250,9 +265,13 @@ const InventarioView = () => {
     setImageLoading(true);
     setImageError("");
     try {
-      await api.post(`/img/change-inventorycover?inventory_id=${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await api.post(
+        `/img/change-inventorycover?inventory_id=${id}`,
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
       setSelectedFile(null);
       setImagePreviewUrl(null);
       setImageCacheKey(Date.now());
@@ -298,7 +317,9 @@ const InventarioView = () => {
     } catch (err) {
       console.error("Failed to update inventory name:", err);
       setNameError(
-        err.response?.data?.detail || err.message || "Error al guardar el nombre."
+        err.response?.data?.detail ||
+          err.message ||
+          "Error al guardar el nombre."
       );
     } finally {
       setNameLoading(false);
@@ -315,14 +336,12 @@ const InventarioView = () => {
   };
 
   if (authIsLoading) {
-    return (
-      <div className="p-4 text-center">Verificando autenticación...</div>
-    );
+    return <div className="p-4 text-center">Verificando autenticación...</div>;
   }
 
   if (!isAuthenticated) {
-     return (
-      <div className="p-4 text-center text-red-600">
+    return (
+      <div className="p-4 text-center text-rojo">
         Debes iniciar sesión para ver esta página.
       </div>
     );
@@ -335,18 +354,19 @@ const InventarioView = () => {
       </div>
     );
   }
-  
+
   if (accessDenied) {
     return (
-      <div className="p-4 text-center text-red-600">
-        {error?.message || "No tienes permiso para ver este inventario o no existe."}
+      <div className="p-4 text-center text-rojo">
+        {error?.message ||
+          "No tienes permiso para ver este inventario o no existe."}
       </div>
     );
   }
 
-  if (error && !inventario) { 
+  if (error && !inventario) {
     return (
-      <div className="p-4 text-center text-red-600">
+      <div className="p-4 text-center text-rojo">
         Error al cargar el inventario: {error.message || "Error desconocido"}
       </div>
     );
@@ -428,7 +448,7 @@ const InventarioView = () => {
                   <HiCheck className="w-3 h-3 xs:w-4 xs:h-4" /> Guardar
                 </button>
                 <button
-                  className="bg-rojo text-white px-2 py-1 xs:px-3 rounded hover:bg-red-600 disabled:opacity-50 text-xs flex items-center gap-1"
+                  className="bg-rojo text-white px-2 py-1 xs:px-3 rounded hover:bg-red-700 disabled:opacity-50 text-xs flex items-center gap-1"
                   onClick={handleCancelUpload}
                   disabled={imageLoading}
                 >
@@ -437,7 +457,7 @@ const InventarioView = () => {
               </div>
             )}
             {imageError && (
-              <div className="absolute top-1 left-1 right-1 text-center text-red-600 bg-white bg-opacity-80 p-1 rounded text-xs font-medium">
+              <div className="absolute top-1 left-1 right-1 text-center text-rojo bg-white bg-opacity-80 p-1 rounded text-xs font-medium">
                 {imageError}
               </div>
             )}
@@ -463,11 +483,13 @@ const InventarioView = () => {
                       disabled={nameLoading}
                       aria-label="Editar Nombre del Inventario"
                       autoFocus
-                      onKeyDown={(e) => e.key === "Enter" && handleSaveNameClick()}
+                      onKeyDown={(e) =>
+                        e.key === "Enter" && handleSaveNameClick()
+                      }
                     />
                   </div>
                   {nameError && (
-                    <p className="text-red-500 text-xs mt-1">{nameError}</p>
+                    <p className="text-rojo text-xs mt-1">{nameError}</p>
                   )}
                   <div className="flex flex-col xs:flex-row gap-2 justify-start mt-2">
                     <button
@@ -517,16 +539,16 @@ const InventarioView = () => {
                 : "N/A"}
             </p>
             {error && inventario && (
-              <p className="text-red-500 mt-1 text-xs">
-                Error: {error.message}
-              </p>
+              <p className="text-rojo mt-1 text-xs">Error: {error.message}</p>
             )}
             <button
               onClick={handleDelete}
-              className="mt-3 bg-red-500 text-white px-3 py-1.5 md:px-4 md:py-2 rounded hover:bg-red-600 disabled:opacity-50 text-sm md:text-base w-full sm:w-auto self-start md:self-start"
+              className="mt-3 bg-rojo text-white px-3 py-1.5 md:px-4 md:py-2 rounded hover:bg-red-700 disabled:opacity-50 text-sm md:text-base w-full sm:w-auto self-start md:self-start"
               disabled={loading}
             >
-              {loading && !nameLoading && !imageLoading ? "Procesando..." : "Borrar Inventario"}
+              {loading && !nameLoading && !imageLoading
+                ? "Procesando..."
+                : "Borrar Inventario"}
             </button>
           </div>
         </div>
@@ -548,7 +570,7 @@ const InventarioView = () => {
                   return (
                     <div
                       key={`invalid-item-${index}`}
-                      className="text-red-500 p-2"
+                      className="text-rojo p-2"
                     >
                       Artículo inválido detectado.
                     </div>
@@ -593,7 +615,8 @@ const InventarioView = () => {
             <Grafico datasets={chartDatasets} />
           ) : (
             <div className="flex justify-center items-center h-full text-gray-500">
-              No hay datos históricos para mostrar o no hay artículos seleccionados.
+              No hay datos históricos para mostrar o no hay artículos
+              seleccionados.
             </div>
           )}
         </div>

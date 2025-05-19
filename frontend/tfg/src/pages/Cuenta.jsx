@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import { HiLogout, HiPencil, HiCheck, HiX, HiCamera } from "react-icons/hi";
-import Avatar from "../components/Avatar"; 
+import Avatar from "../components/Avatar";
 
 const Cuenta = () => {
   const { user, setUser, logout, isLoading: authLoading } = useAuth();
@@ -25,9 +25,9 @@ const Cuenta = () => {
       setSelectedFile(null);
       setImagePreviewUrl(null);
       setImageError("");
-      setAvatarCacheKey(Date.now()); 
+      setAvatarCacheKey(Date.now());
       if (fileInputRef.current) {
-         fileInputRef.current.value = "";
+        fileInputRef.current.value = "";
       }
     } else {
       setDescripcion("");
@@ -36,7 +36,7 @@ const Cuenta = () => {
       setImagePreviewUrl(null);
       setImageError("");
     }
-  }, [user]); 
+  }, [user]);
 
   const handleEditDesc = () => {
     setDescripcion(user?.descripcion || "");
@@ -72,9 +72,9 @@ const Cuenta = () => {
   };
 
   const handleImageClick = () => {
-     if (!imageLoading) {
-        fileInputRef.current?.click();
-     }
+    if (!imageLoading) {
+      fileInputRef.current?.click();
+    }
   };
 
   const handleFileChange = (event) => {
@@ -85,15 +85,15 @@ const Cuenta = () => {
       setImageError("");
     } else {
       setSelectedFile(null);
-      setImagePreviewUrl(null); 
+      setImagePreviewUrl(null);
       if (file) {
         setImageError("Archivo no válido. Selecciona una imagen.");
       } else {
         setImageError("");
       }
-       if (fileInputRef.current) {
-           fileInputRef.current.value = "";
-       }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
@@ -102,7 +102,7 @@ const Cuenta = () => {
     setImagePreviewUrl(null);
     setImageError("");
     if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+      fileInputRef.current.value = "";
     }
   };
 
@@ -126,9 +126,8 @@ const Cuenta = () => {
       setAvatarCacheKey(newCacheKey);
 
       if (fileInputRef.current) {
-          fileInputRef.current.value = "";
+        fileInputRef.current.value = "";
       }
-
     } catch (err) {
       console.error("Error uploading avatar:", err);
       const errorMessage =
@@ -142,7 +141,7 @@ const Cuenta = () => {
   };
 
   if (authLoading || !user) {
-      return <div>Cargando datos de usuario...</div>;
+    return <div>Cargando datos de usuario...</div>;
   }
 
   return (
@@ -158,36 +157,41 @@ const Cuenta = () => {
             onChange={handleFileChange}
             accept="image/*"
             style={{ display: "none" }}
-            disabled={imageLoading} 
+            disabled={imageLoading}
           />
 
-           <div className="w-full h-full rounded-md overflow-hidden border border-gray-300">
-             {imagePreviewUrl ? (
-                 <img
-                     src={imagePreviewUrl}
-                     alt="Previsualización de avatar"
-                     className="object-cover w-full h-full"
-                 />
-             ) : (
-                 <Avatar userId={user.id} key={avatarCacheKey} className="w-full h-full" />
-             )}
-           </div>
-
+          <div className="w-full h-full rounded-md overflow-hidden border border-gray-300">
+            {imagePreviewUrl ? (
+              <img
+                src={imagePreviewUrl}
+                alt="Previsualización de avatar"
+                className="object-cover w-full h-full"
+              />
+            ) : (
+              <Avatar
+                userId={user.id}
+                key={avatarCacheKey}
+                className="w-full h-full"
+              />
+            )}
+          </div>
 
           <div
             className={`absolute inset-0 bg-black flex items-center justify-center rounded-md transition-opacity duration-300 ${
-                imageLoading
-                    ? 'bg-opacity-50 cursor-default'
-                    : 'bg-opacity-0 group-hover:bg-opacity-40 cursor-pointer opacity-0 group-hover:opacity-100' 
+              imageLoading
+                ? "bg-opacity-50 cursor-default"
+                : "bg-opacity-0 group-hover:bg-opacity-40 cursor-pointer opacity-0 group-hover:opacity-100"
             }`}
             onClick={handleImageClick}
             title="Cambiar foto de perfil"
           >
-             {!imageLoading && <HiCamera className="text-white text-4xl" />}
-             {imageLoading && <div className="text-white text-sm">Cargando...</div>}
+            {!imageLoading && <HiCamera className="text-white text-4xl" />}
+            {imageLoading && (
+              <div className="text-white text-sm">Cargando...</div>
+            )}
           </div>
 
-          {selectedFile && !imageLoading && ( 
+          {selectedFile && !imageLoading && (
             <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 p-1 bg-black bg-opacity-50 rounded">
               <button
                 className="bg-primary-color text-white px-3 py-1 rounded hover:bg-secondary-color disabled:opacity-50 text-sm flex items-center gap-1"
@@ -197,7 +201,7 @@ const Cuenta = () => {
                 <HiCheck /> Guardar
               </button>
               <button
-                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 disabled:opacity-50 text-sm flex items-center gap-1"
+                className="bg-rojo text-white px-3 py-1 rounded hover:bg-red-700 disabled:opacity-50 text-sm flex items-center gap-1"
                 onClick={handleCancelUpload}
                 disabled={imageLoading}
               >
@@ -206,35 +210,34 @@ const Cuenta = () => {
             </div>
           )}
 
-           {selectedFile && imageLoading && (
-                <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 p-1 bg-black bg-opacity-50 rounded">
-                     <button
-                        className="bg-primary-color text-white px-3 py-1 rounded disabled:opacity-70 text-sm flex items-center gap-1"
-                        disabled={true}
-                    >
-                        <HiCheck /> Subiendo...
-                    </button>
-                    <button
-                        className="bg-red-500 text-white px-3 py-1 rounded disabled:opacity-70 text-sm flex items-center gap-1"
-                        disabled={true}
-                    >
-                        <HiX /> Cancelar
-                    </button>
-                </div>
-           )}
-
+          {selectedFile && imageLoading && (
+            <div className="absolute bottom-2 left-2 right-2 flex justify-center gap-2 p-1 bg-black bg-opacity-50 rounded">
+              <button
+                className="bg-primary-color text-white px-3 py-1 rounded disabled:opacity-70 text-sm flex items-center gap-1"
+                disabled={true}
+              >
+                <HiCheck /> Subiendo...
+              </button>
+              <button
+                className="bg-rojo text-white px-3 py-1 rounded disabled:opacity-70 text-sm flex items-center gap-1"
+                disabled={true}
+              >
+                <HiX /> Cancelar
+              </button>
+            </div>
+          )}
 
           {imageError && (
-            <div className="absolute top-2 left-2 right-2 text-center text-red-600 bg-white bg-opacity-80 p-1 rounded text-xs font-medium z-10">
+            <div className="absolute top-2 left-2 right-2 text-center text-rojo bg-white bg-opacity-80 p-1 rounded text-xs font-medium z-10">
               {imageError}
             </div>
           )}
         </div>
 
-        <div className="flex flex-col justify-between gap-6 w-full sm:w-auto flex-grow"> 
+        <div className="flex flex-col justify-between gap-6 w-full sm:w-auto flex-grow">
           <div className="flex flex-col gap-4">
             <h1 className="text-primary-color text-3xl sm:text-4xl font-bold break-words">
-              {user.username} 
+              {user.username}
             </h1>
             {isEditingDesc ? (
               <div className="flex flex-col gap-2">
@@ -245,9 +248,7 @@ const Cuenta = () => {
                   onChange={(e) => setDescripcion(e.target.value)}
                   placeholder="Escribe algo sobre ti..."
                 />
-                {descError && (
-                  <p className="text-red-500 text-sm">{descError}</p>
-                )}
+                {descError && <p className="text-rojo text-sm">{descError}</p>}
                 <div className="flex gap-2">
                   <button
                     className="bg-primary-color text-white px-4 py-2 rounded hover:bg-secondary-color disabled:opacity-50 transition-colors duration-300 ease-in-out flex items-center gap-1"
@@ -282,7 +283,7 @@ const Cuenta = () => {
             )}
           </div>
           <button
-            className="bg-red-600 text-lg font-montserrat font-semibold w-fit text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors duration-300 ease-in-out flex items-center gap-2 self-start sm:self-auto mt-4 sm:mt-0"
+            className="bg-rojo text-lg font-montserrat font-semibold w-fit text-white px-6 py-3 rounded-md hover:bg-red-700 transition-colors duration-300 ease-in-out flex items-center gap-2 self-start sm:self-auto mt-4 sm:mt-0"
             onClick={logout}
           >
             <HiLogout className="w-6 h-6" /> Cerrar sesión
