@@ -12,5 +12,5 @@ python-multipart
 email-validator
 pymysql
 pillow
-opencv-python
+opencv-python-headless
 numpy

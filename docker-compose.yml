@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   backend:
     build:
@@ -20,18 +22,32 @@ services:
       context: ./frontend
     ports:
       - "80:80"
-    env_file:
-      - ./frontend/.env
+      - "443:443"
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - backend
     restart: unless-stopped
     networks:
       - app-network
 
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: >
+      sh -c "certbot certonly --webroot --webroot-path=/var/www/certbot
+      --email damj12.2024@gmail.com --agree-tos --no-eff-email
+      -d ordenna.zapto.org"
+    networks:
+      - app-network
+
   db:
     image: mariadb:10.11
     ports:
-      - "3307:3306" 
+      - "3306:3306"
     volumes:
       - mariadb_data:/var/lib/mysql
       - ./database.sql:/docker-entrypoint-initdb.d/database.sql
@@ -45,7 +61,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s 
+      start_period: 30s
     restart: unless-stopped
     networks:
       - app-network
