@@ -1,12 +1,10 @@
-// src/pages/Contacto.js (or your preferred location)
 import React from "react";
-import { Link } from "react-router-dom"; // Keep if you have other links on the page
 import {
   HiOutlineMail,
   HiOutlinePhone,
   HiOutlineLocationMarker,
   HiOutlineChatAlt2,
-  HiPaperAirplane, // For send button icon
+  HiPaperAirplane,
 } from "react-icons/hi";
 
 const Contacto = () => {
@@ -34,7 +32,7 @@ const Contacto = () => {
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">
               Envíanos un Mensaje
             </h2>
-            
+
             <form className="space-y-6">
               <div>
                 <label
@@ -47,7 +45,7 @@ const Contacto = () => {
                   type="text"
                   name="name"
                   id="name"
-                  placeholder="Tu Nombre" 
+                  placeholder="Tu Nombre"
                   className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-color focus:border-primary-color sm:text-sm bg-gray-50 cursor-default"
                 />
               </div>
@@ -144,7 +142,7 @@ const Contacto = () => {
                     +34 662 412 450
                   </a>
                   <p className="text-sm text-gray-500">
-                    Lunes a Viernes, 9am - 5pm. 
+                    Lunes a Viernes, 9am - 5pm.
                   </p>
                 </div>
               </div>
